@@ -7,7 +7,6 @@ import re
 def handle(pb2_request, repo_path):
   ibm = pb2_request.input.decode('utf-8')
 
-  info(ibm)
   searched_dat = re.search("Capacity[\s=]*(?P<capacities>\[.*);", ibm)
   capacities = searched_dat.group('capacities')
 
@@ -17,19 +16,9 @@ def handle(pb2_request, repo_path):
   searched_dat = re.search("Use[\s=]*(?P<weights>\[.*);", ibm, re.DOTALL)
   weights = searched_dat.group('weights')
 
-  info(ibm)
   capacities = eval(capacities)
-  info(ibm)
   values = eval(values)
-  info(ibm)
-  try:
-    weights = eval(weights)
-  except Exception as exception:
-    weights = str(exception)
-
-  info(capacities)
-  info(values)
-  info(weights)
+  weights = eval(weights)
 
   standard_encoding = {
     "capacities": capacities,
