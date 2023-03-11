@@ -1,33 +1,42 @@
+from info import info
 import json
-import ortools.algorithms.pywrapknapsack_solver
+import re
 
-# See: https://developers.google.com/optimization/pack/knapsack#python_4
+# See: https://www.ibm.com/docs/en/icos/12.9.0?topic=problem-typical-integer-program-knapsack
 
 def handle(pb2_request, repo_path):
-  knapsack_instance = json.loads(pb2_request.input)
+  ibm = pb2_request.input.decode('utf-8')
 
-  values = knapsack_instance["values"]
-  weights = knapsack_instance["weights"]
-  capacities = knapsack_instance["capacities"]
+  info(ibm)
+  searched_dat = re.search("Capacity[\s=]*(?P<capacities>\[.*);", ibm)
+  capacities = searched_dat.group('capacities')
 
-  # Create the solver.
-  solver = ortools.algorithms.pywrapknapsack_solver.KnapsackSolver(
-    ortools.algorithms.pywrapknapsack_solver.KnapsackSolver.
-    KNAPSACK_MULTIDIMENSION_BRANCH_AND_BOUND_SOLVER, 'KnapsackExample')
+  searched_dat = re.search("Value[\s=]*(?P<values>\[.*);", ibm)
+  values = searched_dat.group('values')
 
-  solver.Init(values, weights, capacities)
-  computed_value = solver.Solve()
+  searched_dat = re.search("Use[\s=]*(?P<weights>\[.*);", ibm, re.DOTALL)
+  weights = searched_dat.group('weights')
 
-  packed_items = []
-  packed_weights = []
-  total_weight = 0
-  answer_text = f'Total value = {computed_value}\n'
-  for i in range(len(values)):
-    if solver.BestSolutionContains(i):
-      packed_items.append(i)
-      packed_weights.append(weights[0][i])
-      total_weight += weights[0][i]
-  answer_text += f'Total weight: {total_weight}\n'
-  answer_text += f'Packed items: {packed_items}\n'
-  answer_text += f'Packed_weights: {packed_weights}\n'
-  return answer_text
+  info(ibm)
+  capacities = eval(capacities)
+  info(ibm)
+  values = eval(values)
+  info(ibm)
+  try:
+    weights = eval(weights)
+  except Exception as exception:
+    weights = str(exception)
+
+  info(capacities)
+  info(values)
+  info(weights)
+
+  standard_encoding = {
+    "capacities": capacities,
+    "values": values,
+    "weights": weights,
+  }
+
+  standard_encoding = json.dumps(standard_encoding, indent=2)
+
+  return standard_encoding
